@@ -27,26 +27,31 @@ export function buildWorld(scene) {
   scene.collisionsEnabled = true;
   scene.gravity = new Vector3(0, -0.6, 0);
 
-  // Soft pink-tinted fog fading the city edges into the sky.
+  // Subtle pink-tinted fog fading only the far city edges into the sky. Kept
+  // far so the play area stays crisp and colourful (close fog looks milky).
   scene.fogMode = Scene.FOGMODE_LINEAR;
-  scene.fogColor = new Color3(0.82, 0.78, 0.95);
-  scene.fogStart = 55;
-  scene.fogEnd = 140;
+  scene.fogColor = new Color3(0.86, 0.82, 0.96);
+  scene.fogStart = 90;
+  scene.fogEnd = 175;
 
   // ---- Lighting ----
+  // Bright, soft, warm — animation lights the whole frame so colours stay vivid
+  // and shadows never go harsh or muddy. Strong ambient fill is the toon look.
   const hemi = new HemisphericLight("hemi", new Vector3(0, 1, 0), scene);
-  hemi.intensity = 0.85;
-  hemi.diffuse = new Color3(1, 0.95, 0.98);
-  hemi.groundColor = new Color3(0.5, 0.4, 0.55);
+  hemi.intensity = 0.82;
+  hemi.diffuse = new Color3(1, 0.96, 0.98);
+  hemi.groundColor = new Color3(0.62, 0.56, 0.68); // soft bounce, keeps form
 
   const sun = new DirectionalLight("sun", new Vector3(-0.6, -1, 0.4), scene);
   sun.position = new Vector3(40, 60, -30);
-  sun.intensity = 1.1;
+  sun.intensity = 1.0;
+  sun.diffuse = new Color3(1, 0.94, 0.82); // warm storybook key light
 
+  // Soft, light shadows — a gentle contact shadow, not a realistic dark one.
   const shadows = new ShadowGenerator(2048, sun);
   shadows.useBlurExponentialShadowMap = true;
-  shadows.blurKernel = 32;
-  shadows.darkness = 0.35;
+  shadows.blurKernel = 48;
+  shadows.darkness = 0.55; // higher darkness value = lighter shadow in Babylon
 
   // ---- Gradient sky dome (sky blue up top → warm pink at the horizon) ----
   const sky = MeshBuilder.CreateSphere("sky", { diameter: 1000, segments: 16 }, scene);
@@ -66,6 +71,9 @@ export function buildWorld(scene) {
   skyMat.emissiveTexture = skyTex;
   sky.material = skyMat;
   sky.infiniteDistance = true;
+
+  // ---- Puffy storybook clouds + a warm sun disc (flat billboard sprites) ----
+  buildSkyDecor(scene);
 
   // ---- Ground ----
   const ground = MeshBuilder.CreateGround("ground", { width: WORLD_SIZE, height: WORLD_SIZE, subdivisions: 2 }, scene);
@@ -131,6 +139,83 @@ export function buildWorld(scene) {
 }
 
 /* ------------------------------------------------------------------ */
+
+/**
+ * Puffy cartoon clouds + a soft sun glow — flat billboard sprites drawn on a
+ * painted radial-gradient texture, so they read like a hand-drawn animation
+ * backdrop rather than volumetric 3D. They never cast/receive light or shadow.
+ */
+function buildSkyDecor(scene) {
+  // A soft round white puff (transparent falloff at the edges).
+  const puff = new DynamicTexture("cloudTex", { width: 256, height: 160 }, scene, true);
+  const cx = puff.getContext();
+  cx.clearRect(0, 0, 256, 160);
+  // Overlapping soft blobs make a lumpy cloud silhouette.
+  const blobs = [
+    [88, 96, 60], [140, 84, 72], [186, 100, 52], [116, 110, 66], [64, 108, 44],
+  ];
+  blobs.forEach(([x, y, r]) => {
+    const g = cx.createRadialGradient(x, y, r * 0.2, x, y, r);
+    g.addColorStop(0, "rgba(255,255,255,0.98)");
+    g.addColorStop(0.7, "rgba(255,250,254,0.9)");
+    g.addColorStop(1, "rgba(255,250,254,0)");
+    cx.fillStyle = g;
+    cx.beginPath();
+    cx.arc(x, y, r, 0, Math.PI * 2);
+    cx.fill();
+  });
+  puff.update();
+
+  const cloudMat = new StandardMaterial("cloudMat", scene);
+  cloudMat.diffuseTexture = puff;
+  cloudMat.diffuseTexture.hasAlpha = true;
+  cloudMat.useAlphaFromDiffuseTexture = true;
+  cloudMat.emissiveColor = new Color3(1, 1, 1);
+  cloudMat.disableLighting = true;
+  cloudMat.backFaceCulling = false;
+
+  const clouds = [
+    { a: 0.3, r: 95, y: 46, s: 34 },
+    { a: 1.2, r: 105, y: 54, s: 44 },
+    { a: 2.1, r: 90, y: 40, s: 28 },
+    { a: 3.0, r: 110, y: 60, s: 40 },
+    { a: 3.9, r: 98, y: 48, s: 32 },
+    { a: 4.9, r: 100, y: 44, s: 30 },
+    { a: 5.7, r: 108, y: 58, s: 46 },
+  ];
+  clouds.forEach((c, i) => {
+    const plane = MeshBuilder.CreatePlane(`cloud_${i}`, { width: c.s, height: c.s * 0.62 }, scene);
+    plane.material = cloudMat;
+    plane.billboardMode = 7;
+    plane.position.set(Math.cos(c.a) * c.r, c.y, Math.sin(c.a) * c.r);
+    plane.isPickable = false;
+    plane.applyFog = false;
+  });
+
+  // Warm sun glow behind the key-light direction.
+  const sunTex = new DynamicTexture("sunTex", { width: 256, height: 256 }, scene, true);
+  const sctx2 = sunTex.getContext();
+  const sg = sctx2.createRadialGradient(128, 128, 10, 128, 128, 128);
+  sg.addColorStop(0, "rgba(255,250,225,1)");
+  sg.addColorStop(0.35, "rgba(255,236,180,0.85)");
+  sg.addColorStop(1, "rgba(255,220,170,0)");
+  sctx2.fillStyle = sg;
+  sctx2.fillRect(0, 0, 256, 256);
+  sunTex.update();
+  const sunMat = new StandardMaterial("sunMat", scene);
+  sunMat.diffuseTexture = sunTex;
+  sunMat.diffuseTexture.hasAlpha = true;
+  sunMat.useAlphaFromDiffuseTexture = true;
+  sunMat.emissiveColor = new Color3(1, 1, 1);
+  sunMat.disableLighting = true;
+  sunMat.backFaceCulling = false;
+  const sunSprite = MeshBuilder.CreatePlane("sunGlow", { size: 60 }, scene);
+  sunSprite.material = sunMat;
+  sunSprite.billboardMode = 7;
+  sunSprite.position.set(-70, 78, 55); // matches the directional key light
+  sunSprite.isPickable = false;
+  sunSprite.applyFog = false;
+}
 
 function solidMat(scene, name, hex, opts = {}) {
   const m = new StandardMaterial(name, scene);

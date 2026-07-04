@@ -17,6 +17,7 @@ import { NPCs } from "./NPC.js";
 import { QuestManager } from "./QuestManager.js";
 import { Crates } from "./Crates.js";
 import { setupVisuals } from "./Visuals.js";
+import { applyCartoonStyle } from "./Cartoon.js";
 
 export class Game {
   constructor(canvas) {
@@ -78,6 +79,11 @@ export class Game {
       onObjective: opts.onObjective || (() => {}),
       onStory: opts.onStory || (() => {}),
     });
+
+    // Cartoon "animated movie" pass: flatten materials + ink outlines across the
+    // whole scene now that the world and every actor exist. Late spawns (remote
+    // players, respawned crates) are kept in sync via scene observables inside.
+    applyCartoonStyle(this.scene);
 
     if (opts.multiplayer) {
       this.network = new Network(this.scene, {
