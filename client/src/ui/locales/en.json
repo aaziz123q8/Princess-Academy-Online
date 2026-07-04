@@ -28,10 +28,19 @@
 
   "controls.jump": "Jump",
 
+  "quest.collect": "Collect the gems",
+  "quest.done": "Quest complete! +100 coins 🎉",
+
+  "reward.coin": "+{n} 🪙",
+  "reward.gem": "+{n} 💎",
+
   "settings.title": "Settings",
   "settings.language": "Language",
   "settings.english": "English",
   "settings.arabic": "العربية",
+  "settings.sound": "Sound",
+  "settings.sound.on": "On",
+  "settings.sound.off": "Off",
   "settings.close": "Close",
   "settings.logout": "Log Out",
 

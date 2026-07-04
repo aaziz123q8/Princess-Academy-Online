@@ -10,6 +10,7 @@ import { applyToDocument, bindLanguageButtons, setLanguage, getLanguage, t, onLa
 import { api } from "./ui/api.js";
 import { Hud } from "./ui/hud.js";
 import { Game } from "./game/Game.js";
+import { sound } from "./game/Sound.js";
 
 const els = {
   loading: document.getElementById("loadingScreen"),
@@ -141,11 +142,29 @@ function wireSettings() {
     api.logout();
     location.reload();
   });
+
+  // Sound on/off toggle (label stays localized).
+  const soundToggle = document.getElementById("soundToggle");
+  if (soundToggle) {
+    const refresh = () => {
+      soundToggle.textContent = t(sound.muted ? "settings.sound.off" : "settings.sound.on");
+    };
+    refresh();
+    soundToggle.addEventListener("click", () => {
+      sound.toggleMute();
+      if (!sound.muted) sound.click();
+      refresh();
+    });
+    onLanguageChange(refresh);
+  }
 }
 
 /* ------------------------------ Enter game ---------------------------- */
 
 async function enterGame(profile) {
+  // We are inside a user-gesture handler here, so it's safe to unlock audio.
+  sound.start();
+
   hide(els.auth);
   show(els.loading);
   progress(0.1, "loading.engine");
@@ -167,6 +186,20 @@ async function enterGame(profile) {
     onProgress: (p, key) => progress(0.1 + p * 0.9, key),
     onChat: (m) => hud.chatMessage(m),
     onSystem: (key, params) => hud.systemMessage(key, params),
+    onReward: (kind, amount, xp) => {
+      if (kind === "coin") {
+        hud.addCoins(amount);
+        hud.floatReward(t("reward.coin", { n: amount }));
+      } else if (kind === "gem") {
+        hud.addGems(amount);
+        hud.floatReward(t("reward.gem", { n: amount }));
+      }
+      if (xp) {
+        const levels = hud.addXp(xp);
+        if (levels > 0) sound.levelUp();
+      }
+    },
+    onQuest: (done, total) => hud.setQuest(done, total),
   });
   game.attachTouchControls(els.joystick, els.joystickKnob, els.jumpBtn);
 

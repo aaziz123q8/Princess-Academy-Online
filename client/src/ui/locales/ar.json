@@ -28,10 +28,19 @@
 
   "controls.jump": "قفز",
 
+  "quest.collect": "اجمعي الجواهر",
+  "quest.done": "اكتملت المهمة! +100 عملة 🎉",
+
+  "reward.coin": "+{n} 🪙",
+  "reward.gem": "+{n} 💎",
+
   "settings.title": "الإعدادات",
   "settings.language": "اللغة",
   "settings.english": "English",
   "settings.arabic": "العربية",
+  "settings.sound": "الصوت",
+  "settings.sound.on": "تشغيل",
+  "settings.sound.off": "إيقاف",
   "settings.close": "إغلاق",
   "settings.logout": "تسجيل الخروج",
 

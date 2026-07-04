@@ -11,6 +11,7 @@ export class InputManager {
   constructor() {
     this.move = { x: 0, y: 0 };
     this.jumpQueued = false;
+    this.sprint = false;
     this._keys = new Set();
     this.isTouch = matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
 
@@ -26,6 +27,7 @@ export class InputManager {
     if (tag === "INPUT" || tag === "TEXTAREA") return;
 
     const k = e.key.toLowerCase();
+    if (k === "shift") { this.sprint = down; return; }
     const tracked = ["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright", " "];
     if (!tracked.includes(k)) return;
     e.preventDefault();

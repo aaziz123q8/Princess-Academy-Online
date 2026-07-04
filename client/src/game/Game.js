@@ -10,6 +10,8 @@ import { buildWorld } from "./World.js";
 import { InputManager } from "./InputManager.js";
 import { PlayerController } from "./PlayerController.js";
 import { Network } from "./Network.js";
+import { Collectibles } from "./Collectibles.js";
+import { PetCompanion } from "./PetCompanion.js";
 
 export class Game {
   constructor(canvas) {
@@ -36,6 +38,15 @@ export class Game {
 
     this.input = new InputManager();
     this.player = new PlayerController(this.scene, this.canvas, this.input, opts.profile);
+
+    // Adventure: scattered gems/coins + a following pet companion.
+    const getPos = () => this.player.position;
+    this.collectibles = new Collectibles(this.scene, {
+      getPlayerPos: getPos,
+      onReward: opts.onReward || (() => {}),
+      onQuest: opts.onQuest || (() => {}),
+    });
+    this.pet = new PetCompanion(this.scene, getPos);
 
     if (opts.multiplayer) {
       this.network = new Network(this.scene, {
@@ -82,6 +93,8 @@ export class Game {
   dispose() {
     window.removeEventListener("resize", this._onResize);
     this.network?.dispose();
+    this.collectibles?.dispose();
+    this.pet?.dispose();
     this.player?.dispose();
     this.input?.dispose();
     this.scene?.dispose();

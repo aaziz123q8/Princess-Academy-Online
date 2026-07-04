@@ -94,7 +94,8 @@ export class PlayerController {
     }
     this._vy += GRAVITY * dt;
 
-    const move = disp.scale(MOVE_SPEED * dt);
+    const speed = MOVE_SPEED * (this.input.sprint ? 1.7 : 1);
+    const move = disp.scale(speed * dt);
     move.y = this._vy * dt;
     this.collider.moveWithCollisions(move);
 

@@ -85,6 +85,16 @@
       <span class="hud-xp-label"><span data-i18n="hud.xp">XP</span> <span id="hudXpText">0 / 100</span></span>
     </div>
 
+    <!-- Quest tracker -->
+    <div class="quest" id="questTracker">
+      <span class="quest-icon">💎</span>
+      <span data-i18n="quest.collect">Collect the gems</span>
+      <b id="questText">0/0</b>
+    </div>
+
+    <!-- Floating reward popups appear here -->
+    <div id="rewardLayer" class="reward-layer"></div>
+
     <!-- Chat -->
     <div id="chatBox" class="chat">
       <div id="chatLog" class="chat-log"></div>
@@ -111,6 +121,10 @@
           <button data-lang="en" class="lang-btn" data-i18n="settings.english">English</button>
           <button data-lang="ar" class="lang-btn" data-i18n="settings.arabic">العربية</button>
         </div>
+      </div>
+      <div class="setting-row">
+        <span data-i18n="settings.sound">Sound</span>
+        <button id="soundToggle" class="btn small" data-i18n="settings.sound.on">On</button>
       </div>
       <button id="closeSettings" class="btn primary" data-i18n="settings.close">Close</button>
       <button id="logoutBtn" class="btn ghost" data-i18n="settings.logout">Log Out</button>
