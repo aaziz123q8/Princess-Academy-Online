@@ -215,6 +215,9 @@ async function enterGame(profile) {
   new Wardrobe({ game, hud });
   initEmotes(game);
 
+  // Spin attack button (smashes nearby crates).
+  document.getElementById("spinBtn")?.addEventListener("click", () => game.spinAttack());
+
   // Chat send → network.
   hud.onChatSubmit((text) => {
     game.sendChat(text);

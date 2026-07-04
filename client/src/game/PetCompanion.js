@@ -13,6 +13,7 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js"
 import { Texture } from "@babylonjs/core/Materials/Textures/texture.js";
 import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
+import { toonNode } from "./Toon.js";
 
 const FOLLOW_DISTANCE = 2.2;
 const SPEED = 5.5;
@@ -26,6 +27,7 @@ export class PetCompanion {
     this._phase = 0;
 
     this._buildPrimitivePet();
+    toonNode(this.root, 0.03); // cartoon outline
     this._tryLoadSprite(); // upgrades to AI art if pet.png exists
 
     this._obs = scene.onBeforeRenderObservable.add(() => this._update());

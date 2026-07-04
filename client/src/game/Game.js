@@ -15,6 +15,7 @@ import { PetCompanion } from "./PetCompanion.js";
 import { House } from "./House.js";
 import { NPCs } from "./NPC.js";
 import { QuestManager } from "./QuestManager.js";
+import { Crates } from "./Crates.js";
 import { setupVisuals } from "./Visuals.js";
 
 export class Game {
@@ -55,6 +56,9 @@ export class Game {
     });
     this.pet = new PetCompanion(this.scene, getPos);
 
+    // Crash-style breakable crates (smash with the spin attack).
+    this.crates = new Crates(this.scene, { getPlayerPos: getPos, onReward: opts.onReward || (() => {}) });
+
     // Player's house: enter from the city cottage, then decorate the interior.
     this.house = new House(this.scene, {
       player: this.player,
@@ -82,6 +86,11 @@ export class Game {
         onSystem: opts.onSystem,
       });
     }
+
+    // Spin attack (keyboard 'f'); the HUD button calls spinAttack() directly.
+    this.scene.onBeforeRenderObservable.add(() => {
+      if (this.input.consumeSpin()) this.spinAttack();
+    });
 
     // Feed the local transform to the network each frame (throttled inside).
     this.scene.onBeforeRenderObservable.add(() => {
@@ -123,6 +132,13 @@ export class Game {
     this.player?.playEmote(name);
   }
 
+  /** Spin attack: twirl and smash nearby crates. */
+  spinAttack() {
+    if (!this.player) return;
+    this.player.playEmote("spin");
+    this.crates?.breakNear(this.player.position);
+  }
+
   // ---- House controls (driven by the UI) ----
   enterHouse() { this.house?.enter(); }
   exitHouse() { this.house?.exit(); }
@@ -136,6 +152,7 @@ export class Game {
   dispose() {
     window.removeEventListener("resize", this._onResize);
     this.network?.dispose();
+    this.crates?.dispose();
     this.quest?.dispose();
     this.npcs?.dispose();
     this.house?.dispose();

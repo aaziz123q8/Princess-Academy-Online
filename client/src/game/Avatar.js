@@ -12,6 +12,7 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js"
 import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import { DynamicTexture } from "@babylonjs/core/Materials/Textures/dynamicTexture.js";
+import { toonNode } from "./Toon.js";
 
 let uid = 0;
 
@@ -66,6 +67,9 @@ export class Avatar {
     this.label = makeNameLabel(scene, this.name, id);
     this.label.parent = this.root;
     this.label.position.y = 2.15;
+
+    // Cartoon outlines on all body meshes (label/billboards skipped).
+    toonNode(this.root, 0.03);
 
     this._phase = 0;
     this._moving = false;

@@ -10,6 +10,7 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js"
 import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import { sound } from "./Sound.js";
+import { toonMesh } from "./Toon.js";
 
 const PICKUP_RADIUS = 1.6;
 
@@ -50,6 +51,7 @@ export class Collectibles {
       mesh.material = this._mat(`gemMat_${i}`, "#b57bff", "#7a3ff2");
       mesh.position.set(Math.cos(a) * r, 1.1, Math.sin(a) * r);
       mesh.scaling.y = 1.5;
+      toonMesh(mesh, 0.03);
       this.items.push({ mesh, kind: "gem", spin: 2.2, bob: 0.25, base: mesh.position.y });
       this._gemsTotal++;
     }
@@ -63,6 +65,7 @@ export class Collectibles {
       mesh.material = this._mat(`coinMat_${i}`, "#ffcf40", "#e0a800");
       mesh.position.set(Math.cos(a) * r, 0.9, Math.sin(a) * r);
       mesh.rotation.x = Math.PI / 2;
+      toonMesh(mesh, 0.03);
       this.items.push({ mesh, kind: "coin", spin: 3.5, bob: 0.15, base: mesh.position.y });
     }
   }

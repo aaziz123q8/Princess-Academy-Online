@@ -193,7 +193,9 @@ html[dir="rtl"] .chat-input input { text-align: right; }
 /* ---------- Mobile controls ---------- */
 .joystick { position: absolute; bottom: 90px; inset-inline-start: 26px; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,.10); border: 2px solid rgba(255,255,255,.22); touch-action: none; }
 .joystick-knob { position: absolute; top: 50%; left: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: linear-gradient(180deg, var(--pink), var(--pink-deep)); box-shadow: 0 6px 16px rgba(0,0,0,.5); }
-.action-btn { position: absolute; bottom: 100px; inset-inline-end: 30px; width: 84px; height: 84px; border-radius: 50%; border: none; font-family: inherit; font-weight: 800; color: #fff; background: linear-gradient(180deg, var(--purple-light), var(--purple)); box-shadow: 0 8px 18px rgba(0,0,0,.5); cursor: pointer; }
+.action-btn { position: absolute; bottom: 100px; inset-inline-end: 30px; width: 84px; height: 84px; border-radius: 50%; border: none; font-family: inherit; font-weight: 800; font-size: 1.6rem; color: #fff; background: linear-gradient(180deg, var(--purple-light), var(--purple)); box-shadow: 0 8px 18px rgba(0,0,0,.5); cursor: pointer; }
+.action-btn:active { transform: scale(.92); }
+.spin-btn { bottom: 196px; background: linear-gradient(180deg, var(--pink), var(--pink-deep)); }
 
 /* ---------- Wardrobe / shop ---------- */
 .wardrobe-panel { width: min(460px, 94vw); gap: 14px; }

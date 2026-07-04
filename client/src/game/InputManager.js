@@ -11,6 +11,7 @@ export class InputManager {
   constructor() {
     this.move = { x: 0, y: 0 };
     this.jumpQueued = false;
+    this.spinQueued = false;
     this.sprint = false;
     this._keys = new Set();
     this.isTouch = matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
@@ -28,6 +29,7 @@ export class InputManager {
 
     const k = e.key.toLowerCase();
     if (k === "shift") { this.sprint = down; return; }
+    if (k === "f") { if (down) this.spinQueued = true; return; }
     const tracked = ["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright", " "];
     if (!tracked.includes(k)) return;
     e.preventDefault();
@@ -112,6 +114,12 @@ export class InputManager {
     const j = this.jumpQueued;
     this.jumpQueued = false;
     return j;
+  }
+
+  consumeSpin() {
+    const s = this.spinQueued;
+    this.spinQueued = false;
+    return s;
   }
 
   dispose() {
