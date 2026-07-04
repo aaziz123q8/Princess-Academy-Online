@@ -47,7 +47,7 @@ export class PlayerController {
     this.camera = new ArcRotateCamera("tpCam", -Math.PI / 2, 1.15, 9, this.avatar.root.position.clone(), scene);
     this.camera.lowerBetaLimit = 0.35;
     this.camera.upperBetaLimit = 1.45;
-    this.camera.lowerRadiusLimit = 4;
+    this.camera.lowerRadiusLimit = 2;
     this.camera.upperRadiusLimit = 14;
     this.camera.wheelDeltaPercentage = 0.01;
     this.camera.panningSensibility = 0; // it's a follow cam, not a pan cam
@@ -111,6 +111,16 @@ export class PlayerController {
     // Camera follows the avatar (orbit angle stays user-controlled).
     const p = this.avatar.root.position;
     this.camera.target = Vector3.Lerp(this.camera.target, new Vector3(p.x, p.y + 1.2, p.z), 0.2);
+  }
+
+  /** Instantly move the player (and snap the camera) to a new spot. */
+  teleport(pos) {
+    this.collider.position.set(pos.x, CAPSULE_HALF, pos.z);
+    this._vy = 0;
+    this._grounded = true;
+    this._syncAvatar();
+    const p = this.avatar.root.position;
+    this.camera.target = new Vector3(p.x, p.y + 1.2, p.z);
   }
 
   get position() {

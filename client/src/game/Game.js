@@ -12,6 +12,7 @@ import { PlayerController } from "./PlayerController.js";
 import { Network } from "./Network.js";
 import { Collectibles } from "./Collectibles.js";
 import { PetCompanion } from "./PetCompanion.js";
+import { House } from "./House.js";
 
 export class Game {
   constructor(canvas) {
@@ -47,6 +48,12 @@ export class Game {
       onQuest: opts.onQuest || (() => {}),
     });
     this.pet = new PetCompanion(this.scene, getPos);
+
+    // Player's house: enter from the city cottage, then decorate the interior.
+    this.house = new House(this.scene, {
+      player: this.player,
+      onCanEnter: opts.onCanEnter || (() => {}),
+    });
 
     if (opts.multiplayer) {
       this.network = new Network(this.scene, {
@@ -96,11 +103,20 @@ export class Game {
     this.player?.playEmote(name);
   }
 
+  // ---- House controls (driven by the UI) ----
+  enterHouse() { this.house?.enter(); }
+  exitHouse() { this.house?.exit(); }
+  houseDecorate(on) { this.house?.setDecorating(on); }
+  houseSelect(type) { this.house?.selectFurniture(type); }
+  houseRemoveMode(on) { this.house?.setRemoveMode(on); }
+  houseIsInside() { return !!this.house?.inside; }
+
   _onResize = () => this.engine?.resize();
 
   dispose() {
     window.removeEventListener("resize", this._onResize);
     this.network?.dispose();
+    this.house?.dispose();
     this.collectibles?.dispose();
     this.pet?.dispose();
     this.player?.dispose();

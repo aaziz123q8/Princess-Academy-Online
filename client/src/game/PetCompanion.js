@@ -111,6 +111,11 @@ export class PetCompanion {
     const toPlayer = target.subtract(this.root.position);
     toPlayer.y = 0;
     const dist = toPlayer.length();
+    // If the player teleported far away (e.g. entered a house), snap over.
+    if (dist > 20) {
+      this.root.position.set(target.x + 1.5, 0, target.z + 1.5);
+      return;
+    }
     if (dist > FOLLOW_DISTANCE) {
       const dir = toPlayer.normalize();
       const step = Math.min(SPEED * dt, dist - FOLLOW_DISTANCE);

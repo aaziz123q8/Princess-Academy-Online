@@ -13,6 +13,7 @@ import { Game } from "./game/Game.js";
 import { sound } from "./game/Sound.js";
 import { Wardrobe } from "./ui/wardrobe.js";
 import { initEmotes } from "./ui/emotes.js";
+import { initHouseUI } from "./ui/houseUI.js";
 
 const els = {
   loading: document.getElementById("loadingScreen"),
@@ -182,9 +183,11 @@ async function enterGame(profile) {
 
   const canvas = document.getElementById("gameCanvas");
   game = new Game(canvas);
+  const onCanEnter = initHouseUI(game); // wires house buttons, returns proximity handler
   await game.start({
     profile: { name: profile.name, dress: profile.dress, hair: profile.hair, skin: profile.skin },
     multiplayer: true,
+    onCanEnter,
     onProgress: (p, key) => progress(0.1 + p * 0.9, key),
     onChat: (m) => hud.chatMessage(m),
     onSystem: (key, params) => hud.systemMessage(key, params),
@@ -214,6 +217,9 @@ async function enterGame(profile) {
     game.sendChat(text);
     hud.chatMessage({ name: profile.name, text, self: true });
   });
+
+  // Dev-only hook for automated testing (enabled with ?dev in the URL).
+  if (location.search.includes("dev")) window.__game = game;
 
   hide(els.loading);
   hud.show();

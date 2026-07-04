@@ -43,6 +43,11 @@
   "wardrobe.needMore": "Not enough! 💰",
   "wardrobe.unlocked": "Unlocked! ✨",
 
+  "house.enter": "Enter House",
+  "house.decorate": "Decorate",
+  "house.remove": "Remove",
+  "house.exit": "Exit",
+
   "settings.title": "Settings",
   "settings.language": "Language",
   "settings.english": "English",

@@ -43,6 +43,11 @@
   "wardrobe.needMore": "الرصيد غير كافٍ! 💰",
   "wardrobe.unlocked": "تم الفتح! ✨",
 
+  "house.enter": "ادخلي البيت",
+  "house.decorate": "تأثيث",
+  "house.remove": "حذف",
+  "house.exit": "خروج",
+
   "settings.title": "الإعدادات",
   "settings.language": "اللغة",
   "settings.english": "English",
