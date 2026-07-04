@@ -2,20 +2,26 @@
 //  PlayerController.js — Local player: third-person movement + camera.
 //  * Movement is camera-relative (push forward = away from camera).
 //  * The character turns smoothly to face its travel direction.
-//  * Uses Babylon collisions (moveWithCollisions) so it can't walk through
-//    buildings and simple gravity so it stays on the ground / can jump.
+//  * An invisible capsule collider moves with Babylon collisions (so the player
+//    can't walk through buildings) and simple gravity; the visual avatar (a
+//    TransformNode) is synced to the collider each frame.
 //  * An ArcRotateCamera follows the player and supports pointer/touch orbit.
 // ============================================================================
 
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera.js";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
-import { Scalar } from "@babylonjs/core/Maths/math.scalar.js";
+// Side-effects: Ray registers camera.getForwardRay(); collisionCoordinator
+// enables moveWithCollisions(). Babylon's tree-shaking needs these explicitly.
+import "@babylonjs/core/Culling/ray.js";
+import "@babylonjs/core/Collisions/collisionCoordinator.js";
 import { Avatar } from "./Avatar.js";
 
-const MOVE_SPEED = 6.5;      // metres / second
-const TURN_LERP = 0.18;      // how quickly the avatar rotates to face travel dir
+const MOVE_SPEED = 6.5; // metres / second
+const TURN_LERP = 0.18; // how quickly the avatar rotates to face travel dir
 const GRAVITY = -18;
 const JUMP_VELOCITY = 7;
+const CAPSULE_HALF = 1.0; // collider is 2m tall; its centre sits 1m above the feet
 
 export class PlayerController {
   constructor(scene, canvas, input, profile = {}) {
@@ -28,9 +34,14 @@ export class PlayerController {
       hair: profile.hair,
       skin: profile.skin,
     });
-    this.avatar.root.position = new Vector3(0, 0, 10);
-    // Collision ellipsoid so the capsule-ish body clears doorways/walls.
-    this._ellipsoid = new Vector3(0.6, 1.0, 0.6);
+
+    // Invisible collider that actually handles movement + collisions.
+    this.collider = MeshBuilder.CreateCapsule("playerCollider", { radius: 0.5, height: 2 }, scene);
+    this.collider.isVisible = false;
+    this.collider.checkCollisions = true;
+    this.collider.ellipsoid = new Vector3(0.5, CAPSULE_HALF, 0.5);
+    this.collider.position = new Vector3(0, CAPSULE_HALF, 10);
+    this._syncAvatar();
 
     // Third-person camera orbiting the player.
     this.camera = new ArcRotateCamera("tpCam", -Math.PI / 2, 1.15, 9, this.avatar.root.position.clone(), scene);
@@ -39,13 +50,18 @@ export class PlayerController {
     this.camera.lowerRadiusLimit = 4;
     this.camera.upperRadiusLimit = 14;
     this.camera.wheelDeltaPercentage = 0.01;
-    this.camera.panningSensibility = 0; // disable panning; it's a follow cam
+    this.camera.panningSensibility = 0; // it's a follow cam, not a pan cam
     this.camera.attachControl(canvas, true);
     scene.activeCamera = this.camera;
 
-    this._vy = 0;      // vertical velocity
+    this._vy = 0; // vertical velocity
     this._grounded = true;
     this._obs = scene.onBeforeRenderObservable.add(() => this._update());
+  }
+
+  _syncAvatar() {
+    const p = this.collider.position;
+    this.avatar.root.position.set(p.x, p.y - CAPSULE_HALF, p.z);
   }
 
   _update() {
@@ -53,11 +69,11 @@ export class PlayerController {
     const inp = this.input.move;
     const moving = Math.abs(inp.x) > 0.02 || Math.abs(inp.y) > 0.02;
 
-    // Camera-relative basis (flattened to the ground plane).
+    // Camera-relative basis, flattened to the ground plane.
     const forward = this.camera.getForwardRay().direction;
     forward.y = 0;
     forward.normalize();
-    const right = new Vector3(forward.z, 0, -forward.x); // 90° CW of forward
+    const right = new Vector3(forward.z, 0, -forward.x); // 90° from forward
 
     let disp = new Vector3(0, 0, 0);
     if (moving) {
@@ -80,16 +96,18 @@ export class PlayerController {
 
     const move = disp.scale(MOVE_SPEED * dt);
     move.y = this._vy * dt;
-    this.avatar.root.moveWithCollisions(move);
+    this.collider.moveWithCollisions(move);
 
-    // Ground check.
-    if (this.avatar.root.position.y <= 0.01) {
-      this.avatar.root.position.y = 0;
+    // Ground check (collider centre rests at CAPSULE_HALF above the floor).
+    if (this.collider.position.y <= CAPSULE_HALF + 0.001) {
+      this.collider.position.y = CAPSULE_HALF;
       this._vy = 0;
       this._grounded = true;
     }
 
-    // Camera follows the avatar's position (orbit angle stays user-controlled).
+    this._syncAvatar();
+
+    // Camera follows the avatar (orbit angle stays user-controlled).
     const p = this.avatar.root.position;
     this.camera.target = Vector3.Lerp(this.camera.target, new Vector3(p.x, p.y + 1.2, p.z), 0.2);
   }
@@ -108,6 +126,7 @@ export class PlayerController {
 
   dispose() {
     this.scene.onBeforeRenderObservable.remove(this._obs);
+    this.collider.dispose();
     this.avatar.dispose();
     this.camera.dispose();
   }

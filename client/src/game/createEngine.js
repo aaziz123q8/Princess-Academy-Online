@@ -1,30 +1,27 @@
 // ============================================================================
-//  createEngine.js — Boot the best available renderer.
-//  Tries WebGPU first (modern, faster); falls back to WebGL2/WebGL automatically
-//  so the game runs on every desktop and mobile browser.
+//  createEngine.js — Boot the renderer.
+//  We default to WebGL2, which is stable and supported across every modern
+//  desktop and mobile browser. WebGPU is still experimental on mobile (it was
+//  causing load failures on some Android browsers), so it stays OFF until it's
+//  verified per-platform. Flip PREFER_WEBGPU to true to opt back in later.
 // ============================================================================
 
 import { Engine } from "@babylonjs/core/Engines/engine.js";
 import { WebGPUEngine } from "@babylonjs/core/Engines/webgpuEngine.js";
 
-export async function createEngine(canvas) {
-  const canUseWebGPU =
-    typeof navigator !== "undefined" && !!navigator.gpu && WebGPUEngine.IsSupportedAsync;
+const PREFER_WEBGPU = false;
 
-  if (canUseWebGPU) {
+export async function createEngine(canvas) {
+  if (PREFER_WEBGPU && typeof navigator !== "undefined" && navigator.gpu) {
     try {
       const supported = await WebGPUEngine.IsSupportedAsync;
       if (supported) {
-        const engine = new WebGPUEngine(canvas, {
-          antialias: true,
-          adaptToDeviceRatio: true,
-        });
+        const engine = new WebGPUEngine(canvas, { antialias: true, adaptToDeviceRatio: true });
         await engine.initAsync();
         engine.__backend = "webgpu";
         return engine;
       }
     } catch (err) {
-      // WebGPU present but failed to initialise — fall through to WebGL.
       console.warn("[engine] WebGPU init failed, falling back to WebGL:", err);
     }
   }
@@ -32,9 +29,10 @@ export async function createEngine(canvas) {
   const engine = new Engine(canvas, true, {
     preserveDrawingBuffer: false,
     stencil: true,
-    // Cap devicePixelRatio on mobile so high-DPI phones stay at a smooth framerate.
     adaptToDeviceRatio: true,
     powerPreference: "high-performance",
+    // Keep going if the GPU context is briefly lost (mobile tab switches, etc.).
+    doNotHandleContextLost: false,
   });
   engine.__backend = "webgl";
   return engine;

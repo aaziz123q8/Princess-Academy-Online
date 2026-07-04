@@ -36,6 +36,20 @@ let authMode = "login"; // or "register"
 let game = null;
 const hud = new Hud();
 
+// ---- Safety net: never freeze silently. Surface any fatal error on-screen. ----
+function showFatal(msg) {
+  if (els.loaderStatus) {
+    els.loaderStatus.textContent = "⚠ " + msg;
+    els.loaderStatus.style.color = "#ff9a9a";
+  }
+  show(els.loading);
+  console.error("[fatal]", msg);
+}
+window.addEventListener("error", (e) => showFatal(e.message || "Script error"));
+window.addEventListener("unhandledrejection", (e) =>
+  showFatal((e.reason && (e.reason.message || e.reason)) || "Load error")
+);
+
 // ---- Boot ----
 init();
 
