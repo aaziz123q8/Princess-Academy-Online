@@ -38,8 +38,10 @@
   "wardrobe.close": "Done",
   "wardrobe.tab.skin": "Skin",
   "wardrobe.tab.hair": "Hair",
+  "wardrobe.tab.hairStyle": "Style",
   "wardrobe.tab.dress": "Dress",
   "wardrobe.tab.crown": "Crown",
+  "wardrobe.tab.accessory": "Extras",
   "wardrobe.needMore": "Not enough! 💰",
   "wardrobe.unlocked": "Unlocked! ✨",
 
@@ -47,6 +49,12 @@
   "house.decorate": "Decorate",
   "house.remove": "Remove",
   "house.exit": "Exit",
+
+  "daily.reward": "🎁 Daily reward — day {day}! +{coins} coins",
+
+  "npc.luna": "Luna: Welcome, Your Highness! 💜",
+  "npc.rose": "Rose: You look lovely today! 🌹",
+  "npc.bella": "Bella: Have you decorated your house yet? 🏠",
 
   "settings.title": "Settings",
   "settings.language": "Language",

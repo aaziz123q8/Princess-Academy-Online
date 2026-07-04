@@ -183,7 +183,7 @@ async function enterGame(profile) {
 
   const canvas = document.getElementById("gameCanvas");
   game = new Game(canvas);
-  const onCanEnter = initHouseUI(game); // wires house buttons, returns proximity handler
+  const onCanEnter = initHouseUI(game, hud); // wires house buttons, returns proximity handler
   await game.start({
     profile: { name: profile.name, dress: profile.dress, hair: profile.hair, skin: profile.skin },
     multiplayer: true,
@@ -191,6 +191,7 @@ async function enterGame(profile) {
     onProgress: (p, key) => progress(0.1 + p * 0.9, key),
     onChat: (m) => hud.chatMessage(m),
     onSystem: (key, params) => hud.systemMessage(key, params),
+    onGreet: (key, params) => hud.systemMessage(key, params),
     onReward: (kind, amount, xp) => {
       if (kind === "coin") {
         hud.addCoins(amount);
@@ -224,6 +225,7 @@ async function enterGame(profile) {
   hide(els.loading);
   hud.show();
   hud.systemMessage("chat.welcome");
+  claimDailyReward();
 
   // Small welcome reward to demonstrate the economy/XP loop end-to-end.
   if (!profile.guest) scheduleAutosave(profile);
@@ -243,6 +245,30 @@ function scheduleAutosave(profile) {
       xpMax: hud.state.xpMax,
     }).catch(() => {}); // ignore transient network errors
   }, 15000);
+}
+
+/**
+ * Grant a daily login reward once per calendar day, with a growing streak.
+ */
+function claimDailyReward() {
+  const KEY = "pao.daily";
+  let d;
+  try { d = JSON.parse(localStorage.getItem(KEY)) || {}; } catch { d = {}; }
+  const today = new Date().toISOString().slice(0, 10);
+  if (d.last === today) return; // already claimed today
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  d.streak = d.last === yesterday ? (d.streak || 0) + 1 : 1;
+  d.last = today;
+  localStorage.setItem(KEY, JSON.stringify(d));
+
+  const reward = 50 + (d.streak - 1) * 10;
+  setTimeout(() => {
+    hud.addCoins(reward);
+    hud.floatReward(t("reward.coin", { n: reward }));
+    hud.systemMessage("daily.reward", { day: d.streak, coins: reward });
+    sound.levelUp();
+  }, 1200);
 }
 
 /* ------------------------------- helpers ------------------------------ */

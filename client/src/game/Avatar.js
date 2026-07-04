@@ -59,6 +59,10 @@ export class Avatar {
     this.armL.parent = this.root;
     this.armR.parent = this.root;
 
+    this._buildHairAndAccessories(scene, id);
+    this.setHairStyle(opts.hairStyle || "short");
+    this.setAccessory(opts.accessory || "none");
+
     this.label = makeNameLabel(scene, this.name, id);
     this.label.parent = this.root;
     this.label.position.y = 2.15;
@@ -82,6 +86,57 @@ export class Avatar {
     if (app.hair) this.mat.hair.diffuseColor = Color3.FromHexString(app.hair);
     if (app.dress) this.mat.dress.diffuseColor = Color3.FromHexString(app.dress);
     if (app.crown) this.mat.crown.diffuseColor = Color3.FromHexString(app.crown);
+    if (app.hairStyle) this.setHairStyle(app.hairStyle);
+    if (app.accessory) this.setAccessory(app.accessory);
+  }
+
+  /** Build all hair-style and accessory meshes once; toggled by setters. */
+  _buildHairAndAccessories(scene, id) {
+    const mkBox = (name, w, h, d, matl) => {
+      const m = MeshBuilder.CreateBox(`${id}_${name}`, { width: w, height: h, depth: d }, scene);
+      m.material = matl; m.parent = this.root; return m;
+    };
+    const mkSphere = (name, dia, matl) => {
+      const m = MeshBuilder.CreateSphere(`${id}_${name}`, { diameter: dia, segments: 8 }, scene);
+      m.material = matl; m.parent = this.root; return m;
+    };
+
+    // Hair styles (base cap is always shown; these are the extras).
+    const longL = mkBox("hlongL", 0.16, 0.9, 0.2, this.mat.hair); longL.position.set(-0.28, 1.15, 0);
+    const longR = mkBox("hlongR", 0.16, 0.9, 0.2, this.mat.hair); longR.position.set(0.28, 1.15, 0);
+    const pony = MeshBuilder.CreateCapsule(`${id}_pony`, { radius: 0.14, height: 0.9 }, scene);
+    pony.material = this.mat.hair; pony.parent = this.root; pony.position.set(0, 1.2, -0.32); pony.rotation.x = 0.4;
+    const bun = mkSphere("bun", 0.4, this.mat.hair); bun.position.set(0, 1.9, -0.05);
+    this._hairStyles = { long: [longL, longR], ponytail: [pony], bun: [bun] };
+
+    // Accessories.
+    const glasses = mkBox("glasses", 0.5, 0.12, 0.05, mat(scene, `${id}_glassMat`, "#2a1436"));
+    glasses.position.set(0, 1.45, 0.32);
+    const wingMat = mat(scene, `${id}_wingMat`, "#eaf2ff");
+    const wingL = mkSphere("wingL", 0.5, wingMat); wingL.scaling.set(0.5, 0.9, 0.14); wingL.position.set(-0.45, 0.85, -0.25);
+    const wingR = mkSphere("wingR", 0.5, wingMat); wingR.scaling.set(0.5, 0.9, 0.14); wingR.position.set(0.45, 0.85, -0.25);
+    const halo = MeshBuilder.CreateCylinder(`${id}_halo`, { diameter: 0.55, height: 0.05, tessellation: 20 }, scene);
+    halo.material = mat(scene, `${id}_haloMat`, "#fff2b0"); halo.material.emissiveColor = Color3.FromHexString("#ffcf40");
+    halo.parent = this.root; halo.position.set(0, 2.05, 0);
+    this._accessories = { glasses: [glasses], wings: [wingL, wingR], halo: [halo] };
+
+    // Hide everything initially.
+    Object.values(this._hairStyles).flat().forEach((m) => m.setEnabled(false));
+    Object.values(this._accessories).flat().forEach((m) => m.setEnabled(false));
+  }
+
+  setHairStyle(style) {
+    if (!this._hairStyles) return;
+    Object.values(this._hairStyles).flat().forEach((m) => m.setEnabled(false));
+    (this._hairStyles[style] || []).forEach((m) => m.setEnabled(true));
+    this.hairStyle = style;
+  }
+
+  setAccessory(acc) {
+    if (!this._accessories) return;
+    Object.values(this._accessories).flat().forEach((m) => m.setEnabled(false));
+    (this._accessories[acc] || []).forEach((m) => m.setEnabled(true));
+    this.accessory = acc;
   }
 
   /** Trigger an emote animation. */

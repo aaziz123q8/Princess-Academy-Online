@@ -13,6 +13,8 @@ import { Network } from "./Network.js";
 import { Collectibles } from "./Collectibles.js";
 import { PetCompanion } from "./PetCompanion.js";
 import { House } from "./House.js";
+import { NPCs } from "./NPC.js";
+import { setupVisuals } from "./Visuals.js";
 
 export class Game {
   constructor(canvas) {
@@ -40,6 +42,9 @@ export class Game {
     this.input = new InputManager();
     this.player = new PlayerController(this.scene, this.canvas, this.input, opts.profile);
 
+    // Cinematic post-processing (needs the camera to exist first).
+    setupVisuals(this.scene, this.player.camera);
+
     // Adventure: scattered gems/coins + a following pet companion.
     const getPos = () => this.player.position;
     this.collectibles = new Collectibles(this.scene, {
@@ -53,6 +58,12 @@ export class Game {
     this.house = new House(this.scene, {
       player: this.player,
       onCanEnter: opts.onCanEnter || (() => {}),
+    });
+
+    // Friendly NPCs that greet the player.
+    this.npcs = new NPCs(this.scene, {
+      getPlayerPos: getPos,
+      onGreet: opts.onGreet || (() => {}),
     });
 
     if (opts.multiplayer) {
@@ -116,6 +127,7 @@ export class Game {
   dispose() {
     window.removeEventListener("resize", this._onResize);
     this.network?.dispose();
+    this.npcs?.dispose();
     this.house?.dispose();
     this.collectibles?.dispose();
     this.pet?.dispose();

@@ -14,7 +14,7 @@ import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight.js";
 import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator.js";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js";
-import { Texture } from "@babylonjs/core/Materials/Textures/texture.js";
+import { DynamicTexture } from "@babylonjs/core/Materials/Textures/dynamicTexture.js";
 
 import "@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent.js";
 import "@babylonjs/core/Collisions/collisionCoordinator.js";
@@ -43,16 +43,27 @@ export function buildWorld(scene) {
   sun.position = new Vector3(40, 60, -30);
   sun.intensity = 1.1;
 
-  const shadows = new ShadowGenerator(1024, sun);
+  const shadows = new ShadowGenerator(2048, sun);
   shadows.useBlurExponentialShadowMap = true;
-  shadows.blurKernel = 24;
+  shadows.blurKernel = 32;
+  shadows.darkness = 0.35;
 
-  // ---- Skybox ----
-  const sky = MeshBuilder.CreateBox("sky", { size: 500 }, scene);
+  // ---- Gradient sky dome (sky blue up top → warm pink at the horizon) ----
+  const sky = MeshBuilder.CreateSphere("sky", { diameter: 1000, segments: 16 }, scene);
+  const skyTex = new DynamicTexture("skyTex", { width: 32, height: 512 }, scene, false);
+  const sctx = skyTex.getContext();
+  const grad = sctx.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0.0, "#4f86d6");   // zenith
+  grad.addColorStop(0.45, "#a9c8ee");
+  grad.addColorStop(0.6, "#ffe1ef");   // horizon glow
+  grad.addColorStop(1.0, "#ffd0e0");
+  sctx.fillStyle = grad;
+  sctx.fillRect(0, 0, 32, 512);
+  skyTex.update();
   const skyMat = new StandardMaterial("skyMat", scene);
   skyMat.backFaceCulling = false;
   skyMat.disableLighting = true;
-  skyMat.emissiveColor = new Color3(0.6, 0.78, 0.98);
+  skyMat.emissiveTexture = skyTex;
   sky.material = skyMat;
   sky.infiniteDistance = true;
 
