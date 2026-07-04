@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Princess Academy Online 👑</title>
+  <meta name="description" content="A magical online academy where young princesses learn, play, and earn crowns!" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>" />
+</head>
+<body>
+  <!-- Floating background sparkles -->
+  <div class="sparkles" aria-hidden="true"></div>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-crown">👑</span>
+      <span class="brand-name">Princess Academy</span>
+    </div>
+    <div class="wallet" title="Your royal crowns">
+      <span class="wallet-icon">👑</span>
+      <span id="crownCount">0</span>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- ===== HOME / LOBBY ===== -->
+    <section class="screen active" id="screen-home">
+      <div class="hero">
+        <h1 class="hero-title">Welcome to <br /><span>Princess Academy</span></h1>
+        <p class="hero-sub">Learn, play, and earn crowns in the most magical academy in the kingdom.</p>
+        <p class="greeting" id="greeting"></p>
+      </div>
+
+      <h2 class="section-label">Choose a Classroom</h2>
+      <div class="classroom-grid">
+        <button class="classroom-card" data-goto="screen-dressup">
+          <span class="cc-icon">👗</span>
+          <span class="cc-title">Dress-Up Studio</span>
+          <span class="cc-desc">Design your royal look</span>
+        </button>
+        <button class="classroom-card" data-goto="screen-quiz">
+          <span class="cc-icon">🧠</span>
+          <span class="cc-title">Royal Quiz</span>
+          <span class="cc-desc">Test your kingdom smarts</span>
+        </button>
+        <button class="classroom-card" data-goto="screen-memory">
+          <span class="cc-icon">🃏</span>
+          <span class="cc-title">Memory Match</span>
+          <span class="cc-desc">Find the matching pairs</span>
+        </button>
+        <button class="classroom-card" data-goto="screen-manners">
+          <span class="cc-icon">🫖</span>
+          <span class="cc-title">Etiquette Class</span>
+          <span class="cc-desc">Learn royal manners</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== DRESS-UP STUDIO ===== -->
+    <section class="screen" id="screen-dressup">
+      <button class="back-btn" data-goto="screen-home">← Back to Academy</button>
+      <h2 class="screen-title">👗 Dress-Up Studio</h2>
+      <div class="dressup-layout">
+        <div class="doll-stage">
+          <div class="doll" id="doll">
+            <div class="doll-crown" id="layer-crown"></div>
+            <div class="doll-face">
+              <div class="doll-hair" id="layer-hair"></div>
+              <div class="doll-eyes">👁️ 👁️</div>
+              <div class="doll-smile"></div>
+            </div>
+            <div class="doll-dress" id="layer-dress"></div>
+          </div>
+          <button class="btn primary" id="saveLookBtn">Save My Look (+5 👑)</button>
+        </div>
+        <div class="dressup-controls">
+          <div class="control-group">
+            <h3>Crown</h3>
+            <div class="swatches" data-layer="crown"></div>
+          </div>
+          <div class="control-group">
+            <h3>Hair</h3>
+            <div class="swatches" data-layer="hair"></div>
+          </div>
+          <div class="control-group">
+            <h3>Dress</h3>
+            <div class="swatches" data-layer="dress"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ROYAL QUIZ ===== -->
+    <section class="screen" id="screen-quiz">
+      <button class="back-btn" data-goto="screen-home">← Back to Academy</button>
+      <h2 class="screen-title">🧠 Royal Quiz</h2>
+      <div class="quiz-card">
+        <div class="quiz-progress"><span id="quizProgress">Question 1</span></div>
+        <p class="quiz-question" id="quizQuestion">Loading...</p>
+        <div class="quiz-answers" id="quizAnswers"></div>
+        <p class="quiz-feedback" id="quizFeedback"></p>
+        <button class="btn primary hidden" id="quizNextBtn">Next →</button>
+      </div>
+      <div class="quiz-done hidden" id="quizDone">
+        <h3>Quiz Complete! 🎉</h3>
+        <p id="quizScore"></p>
+        <button class="btn primary" id="quizRestartBtn">Play Again</button>
+      </div>
+    </section>
+
+    <!-- ===== MEMORY MATCH ===== -->
+    <section class="screen" id="screen-memory">
+      <button class="back-btn" data-goto="screen-home">← Back to Academy</button>
+      <h2 class="screen-title">🃏 Memory Match</h2>
+      <div class="memory-hud">
+        <span>Moves: <b id="memMoves">0</b></span>
+        <span>Pairs: <b id="memPairs">0</b>/8</span>
+        <button class="btn" id="memRestartBtn">Restart</button>
+      </div>
+      <div class="memory-board" id="memoryBoard"></div>
+      <div class="memory-win hidden" id="memoryWin">
+        <h3>You matched them all! 🏆</h3>
+        <p id="memoryWinText"></p>
+      </div>
+    </section>
+
+    <!-- ===== ETIQUETTE CLASS ===== -->
+    <section class="screen" id="screen-manners">
+      <button class="back-btn" data-goto="screen-home">← Back to Academy</button>
+      <h2 class="screen-title">🫖 Etiquette Class</h2>
+      <p class="manners-intro">A true princess is kind and thoughtful. Choose the most royal response!</p>
+      <div class="manners-card" id="mannersCard">
+        <p class="manners-scenario" id="mannersScenario">Loading...</p>
+        <div class="manners-options" id="mannersOptions"></div>
+        <p class="manners-feedback" id="mannersFeedback"></p>
+        <button class="btn primary hidden" id="mannersNextBtn">Next Lesson →</button>
+      </div>
+      <div class="manners-done hidden" id="mannersDone">
+        <h3>Graduation! 🎓</h3>
+        <p>You have mastered royal etiquette.</p>
+        <button class="btn primary" id="mannersRestartBtn">Study Again</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Made with 💖 at Princess Academy Online · Your progress is saved on this device</p>
+  </footer>
+
+  <!-- Reward toast -->
+  <div class="toast" id="toast" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
