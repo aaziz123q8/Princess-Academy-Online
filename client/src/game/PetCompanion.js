@@ -14,6 +14,7 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture.js";
 import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import { toonNode } from "./Toon.js";
+import { loadModel } from "./ModelLoader.js";
 
 const FOLLOW_DISTANCE = 2.2;
 const SPEED = 5.5;
@@ -28,7 +29,7 @@ export class PetCompanion {
 
     this._buildPrimitivePet();
     toonNode(this.root, 0.03); // cartoon outline
-    this._tryLoadSprite(); // upgrades to AI art if pet.png exists
+    this._tryUpgradeArt(); // 3D model > sprite > primitive
 
     this._obs = scene.onBeforeRenderObservable.add(() => this._update());
   }
@@ -69,6 +70,20 @@ export class PetCompanion {
       wing.position.set(x, 0.6, -0.15);
       wing.parent = this.root;
     });
+  }
+
+  /**
+   * Upgrade the pet's look if better art is available, best first:
+   *   1) a real 3D model at assets/models/pet.glb
+   *   2) a 2D sprite at pet.png
+   *   3) otherwise keep the built-in primitive pet.
+   * Any failure silently falls through to the next option.
+   */
+  _tryUpgradeArt() {
+    const prims = this.root.getChildMeshes();
+    loadModel(this.scene, "./assets/models/pet.glb", this.root, 1.3)
+      .then(() => prims.forEach((m) => m.setEnabled(false)))
+      .catch(() => this._tryLoadSprite());
   }
 
   /** If pet.png exists at site root, show it as a billboard sprite. */
