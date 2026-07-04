@@ -88,6 +88,14 @@ export class Game {
     this.player?.setName(name);
   }
 
+  setAppearance(app) {
+    this.player?.setAppearance(app);
+  }
+
+  playEmote(name) {
+    this.player?.playEmote(name);
+  }
+
   _onResize = () => this.engine?.resize();
 
   dispose() {

@@ -1,9 +1,9 @@
 // ============================================================================
-//  Avatar.js — Builds a stylized princess character from primitives and gives
-//  it a simple procedural walk animation. Used for BOTH the local player and
-//  remote players. In a later art phase this is swapped for a rigged glTF model
-//  loaded through @babylonjs/loaders — the rest of the game only touches the
-//  root TransformNode and setMoving()/setColors(), so nothing else changes.
+//  Avatar.js — Stylized princess character built from primitives.
+//  Supports live appearance changes (skin / hair / dress / crown colours) and
+//  emotes (wave, cheer, dance, spin) on top of a procedural walk cycle. Used
+//  for both the local player and remote players. Swappable for a rigged glTF
+//  later — callers only touch the root node, setAppearance(), and playEmote().
 // ============================================================================
 
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
@@ -15,63 +15,60 @@ import { DynamicTexture } from "@babylonjs/core/Materials/Textures/dynamicTextur
 
 let uid = 0;
 
+const EMOTE_DURATION = 2.2; // seconds
+
 export class Avatar {
-  /**
-   * @param {import("@babylonjs/core/scene").Scene} scene
-   * @param {object} opts { name, skin, dress, hair }
-   */
   constructor(scene, opts = {}) {
     this.scene = scene;
     this.name = opts.name || "Princess";
     const id = `avatar_${uid++}`;
 
-    const skin = mat(scene, `${id}_skin`, opts.skin || "#ffd9c0");
-    const dress = mat(scene, `${id}_dress`, opts.dress || "#ff5fa2");
-    const hair = mat(scene, `${id}_hair`, opts.hair || "#5b3a29");
+    this.mat = {
+      skin: mat(scene, `${id}_skin`, opts.skin || "#ffd9c0"),
+      dress: mat(scene, `${id}_dress`, opts.dress || "#ff5fa2"),
+      hair: mat(scene, `${id}_hair`, opts.hair || "#5b3a29"),
+      crown: mat(scene, `${id}_crown`, opts.crown || "#ffcf40"),
+    };
 
-    // Root node — the ONLY thing external systems move/rotate.
     this.root = new TransformNode(id, scene);
 
-    // Body (dress) — a tapered cylinder.
     const body = MeshBuilder.CreateCylinder(`${id}_body`, { diameterTop: 0.5, diameterBottom: 1.0, height: 1.1, tessellation: 16 }, scene);
-    body.material = dress;
+    body.material = this.mat.dress;
     body.position.y = 0.55;
     body.parent = this.root;
-    body.checkCollisions = false;
+    this._body = body;
 
-    // Head.
     const head = MeshBuilder.CreateSphere(`${id}_head`, { diameter: 0.55, segments: 12 }, scene);
-    head.material = skin;
+    head.material = this.mat.skin;
     head.position.y = 1.42;
     head.parent = this.root;
 
-    // Hair cap.
     const hairCap = MeshBuilder.CreateSphere(`${id}_hair`, { diameter: 0.62, segments: 12, slice: 0.62 }, scene);
-    hairCap.material = hair;
+    hairCap.material = this.mat.hair;
     hairCap.position.y = 1.5;
     hairCap.parent = this.root;
 
-    // Crown.
-    const crown = MeshBuilder.CreateCylinder(`${id}_crown`, { diameterTop: 0.42, diameterBottom: 0.32, height: 0.2, tessellation: 8 }, scene);
-    crown.material = mat(scene, `${id}_crownmat`, "#ffcf40");
+    const crown = MeshBuilder.CreateCylinder(`${id}_crownmesh`, { diameterTop: 0.42, diameterBottom: 0.32, height: 0.2, tessellation: 8 }, scene);
+    crown.material = this.mat.crown;
     crown.position.y = 1.78;
     crown.parent = this.root;
+    this._crown = crown;
 
-    // Arms (animated).
-    this.armL = limb(scene, `${id}_armL`, skin, -0.42);
-    this.armR = limb(scene, `${id}_armR`, skin, 0.42);
+    this.armL = limb(scene, `${id}_armL`, this.mat.skin, -0.42);
+    this.armR = limb(scene, `${id}_armR`, this.mat.skin, 0.42);
     this.armL.parent = this.root;
     this.armR.parent = this.root;
 
-    // Floating name label above the head.
     this.label = makeNameLabel(scene, this.name, id);
     this.label.parent = this.root;
     this.label.position.y = 2.15;
 
     this._phase = 0;
     this._moving = false;
+    this._emote = null;
+    this._emoteT = 0;
+    this._baseYaw = 0;
 
-    // Per-frame limb animation.
     this._obs = scene.onBeforeRenderObservable.add(() => this._animate());
   }
 
@@ -79,15 +76,65 @@ export class Avatar {
     this._moving = isMoving;
   }
 
+  /** Update any subset of appearance colours (hex strings). */
+  setAppearance(app = {}) {
+    if (app.skin) this.mat.skin.diffuseColor = Color3.FromHexString(app.skin);
+    if (app.hair) this.mat.hair.diffuseColor = Color3.FromHexString(app.hair);
+    if (app.dress) this.mat.dress.diffuseColor = Color3.FromHexString(app.dress);
+    if (app.crown) this.mat.crown.diffuseColor = Color3.FromHexString(app.crown);
+  }
+
+  /** Trigger an emote animation. */
+  playEmote(name) {
+    this._emote = name;
+    this._emoteT = 0;
+    this._baseYaw = this.root.rotation.y;
+  }
+
   _animate() {
     const dt = this.scene.getEngine().getDeltaTime() / 1000;
+
+    // Emote overrides walk/idle while active.
+    if (this._emote) {
+      this._emoteT += dt;
+      const t = this._emoteT;
+      switch (this._emote) {
+        case "wave":
+          this.armR.rotation.x = -2.4;
+          this.armR.rotation.z = Math.sin(t * 10) * 0.5;
+          break;
+        case "cheer":
+          this.armL.rotation.x = -2.5;
+          this.armR.rotation.x = -2.5;
+          this._body.position.y = 0.55 + Math.abs(Math.sin(t * 6)) * 0.12;
+          break;
+        case "dance":
+          this.armL.rotation.x = Math.sin(t * 8) * 1.2;
+          this.armR.rotation.x = -Math.sin(t * 8) * 1.2;
+          this.root.rotation.z = Math.sin(t * 8) * 0.15;
+          this._body.position.y = 0.55 + Math.abs(Math.sin(t * 8)) * 0.08;
+          break;
+        case "spin":
+          this.root.rotation.y = this._baseYaw + (t / EMOTE_DURATION) * Math.PI * 2;
+          break;
+      }
+      if (this._emoteT >= EMOTE_DURATION) {
+        this._emote = null;
+        this.root.rotation.z = 0;
+        this.armL.rotation.x = 0;
+        this.armR.rotation.x = 0;
+        this.armR.rotation.z = 0;
+        this._body.position.y = 0.55;
+      }
+      return;
+    }
+
     if (this._moving) {
       this._phase += dt * 9;
       const swing = Math.sin(this._phase) * 0.6;
       this.armL.rotation.x = swing;
       this.armR.rotation.x = -swing;
-      // Subtle body bob while walking.
-      this.root.getChildMeshes()[0].position.y = 0.55 + Math.abs(Math.sin(this._phase)) * 0.04;
+      this._body.position.y = 0.55 + Math.abs(Math.sin(this._phase)) * 0.04;
     } else {
       this.armL.rotation.x *= 0.8;
       this.armR.rotation.x *= 0.8;
@@ -128,7 +175,7 @@ function limb(scene, name, material, offsetX) {
 
 function makeNameLabel(scene, name, id) {
   const plane = MeshBuilder.CreatePlane(`${id}_label`, { width: 1.6, height: 0.4 }, scene);
-  plane.billboardMode = 7; // BILLBOARDMODE_ALL — always faces camera
+  plane.billboardMode = 7;
   const tex = new DynamicTexture(`${id}_labeltex`, { width: 256, height: 64 }, scene, false);
   tex.hasAlpha = true;
   const m = new StandardMaterial(`${id}_labelmat`, scene);

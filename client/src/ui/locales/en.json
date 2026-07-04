@@ -34,6 +34,15 @@
   "reward.coin": "+{n} 🪙",
   "reward.gem": "+{n} 💎",
 
+  "wardrobe.title": "Wardrobe",
+  "wardrobe.close": "Done",
+  "wardrobe.tab.skin": "Skin",
+  "wardrobe.tab.hair": "Hair",
+  "wardrobe.tab.dress": "Dress",
+  "wardrobe.tab.crown": "Crown",
+  "wardrobe.needMore": "Not enough! 💰",
+  "wardrobe.unlocked": "Unlocked! ✨",
+
   "settings.title": "Settings",
   "settings.language": "Language",
   "settings.english": "English",

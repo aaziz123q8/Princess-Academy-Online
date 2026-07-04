@@ -125,6 +125,14 @@ export class PlayerController {
     this.avatar.setName(name);
   }
 
+  setAppearance(app) {
+    this.avatar.setAppearance(app);
+  }
+
+  playEmote(name) {
+    this.avatar.playEmote(name);
+  }
+
   dispose() {
     this.scene.onBeforeRenderObservable.remove(this._obs);
     this.collider.dispose();

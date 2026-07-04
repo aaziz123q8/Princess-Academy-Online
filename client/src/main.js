@@ -11,6 +11,8 @@ import { api } from "./ui/api.js";
 import { Hud } from "./ui/hud.js";
 import { Game } from "./game/Game.js";
 import { sound } from "./game/Sound.js";
+import { Wardrobe } from "./ui/wardrobe.js";
+import { initEmotes } from "./ui/emotes.js";
 
 const els = {
   loading: document.getElementById("loadingScreen"),
@@ -202,6 +204,10 @@ async function enterGame(profile) {
     onQuest: (done, total) => hud.setQuest(done, total),
   });
   game.attachTouchControls(els.joystick, els.joystickKnob, els.jumpBtn);
+
+  // Customization (wardrobe/shop) + emotes. Wardrobe applies the saved look.
+  new Wardrobe({ game, hud });
+  initEmotes(game);
 
   // Chat send → network.
   hud.onChatSubmit((text) => {
