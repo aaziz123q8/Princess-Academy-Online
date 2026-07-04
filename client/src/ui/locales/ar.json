@@ -1,0 +1,44 @@
+{
+  "app.title": "أكاديمية الأميرات أونلاين",
+  "loading.booting": "يبدأ السحر…",
+  "loading.engine": "إيقاظ العالم ثلاثي الأبعاد…",
+  "loading.world": "بناء المدينة الخيالية…",
+  "loading.ready": "جاهز!",
+
+  "auth.login": "تسجيل الدخول",
+  "auth.register": "إنشاء حساب",
+  "auth.username": "اسم المستخدم",
+  "auth.email": "البريد الإلكتروني",
+  "auth.password": "كلمة المرور",
+  "auth.guest": "اللعب كضيف",
+  "auth.welcome": "أهلاً بكِ يا {name}!",
+  "auth.error.generic": "حدث خطأ ما. حاولي مرة أخرى.",
+  "auth.error.invalid": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+  "auth.error.exists": "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل.",
+  "auth.error.offline": "الخادم غير متاح — اللعب دون اتصال كضيف.",
+
+  "hud.level": "المستوى",
+  "hud.xp": "الخبرة",
+
+  "chat.placeholder": "اكتبي شيئاً…",
+  "chat.send": "إرسال",
+  "chat.joined": "{name} دخلت المدينة.",
+  "chat.left": "{name} غادرت المدينة.",
+  "chat.welcome": "أهلاً بكِ في أكاديمية الأميرات! استخدمي الأزرار أو عصا التحكم للحركة.",
+
+  "controls.jump": "قفز",
+
+  "settings.title": "الإعدادات",
+  "settings.language": "اللغة",
+  "settings.english": "English",
+  "settings.arabic": "العربية",
+  "settings.close": "إغلاق",
+  "settings.logout": "تسجيل الخروج",
+
+  "world.fountain": "نافورة الأمنيات",
+  "world.academy": "الأكاديمية الكبرى",
+  "world.boutique": "بوتيك الأميرات",
+
+  "notify.reward.daily": "مكافأة يومية: +{coins} عملة!",
+  "notify.levelup": "ترقية! أصبحتِ في المستوى {level}."
+}

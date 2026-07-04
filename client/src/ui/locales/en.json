@@ -1,0 +1,44 @@
+{
+  "app.title": "Princess Academy Online",
+  "loading.booting": "Starting the magic…",
+  "loading.engine": "Awakening the 3D world…",
+  "loading.world": "Building the fantasy city…",
+  "loading.ready": "Ready!",
+
+  "auth.login": "Log In",
+  "auth.register": "Register",
+  "auth.username": "Username",
+  "auth.email": "Email",
+  "auth.password": "Password",
+  "auth.guest": "Play as Guest",
+  "auth.welcome": "Welcome, {name}!",
+  "auth.error.generic": "Something went wrong. Please try again.",
+  "auth.error.invalid": "Wrong email or password.",
+  "auth.error.exists": "That username or email is already taken.",
+  "auth.error.offline": "Server unavailable — playing offline as a guest.",
+
+  "hud.level": "Level",
+  "hud.xp": "XP",
+
+  "chat.placeholder": "Say something…",
+  "chat.send": "Send",
+  "chat.joined": "{name} entered the city.",
+  "chat.left": "{name} left the city.",
+  "chat.welcome": "Welcome to Princess Academy! Use WASD or the joystick to move.",
+
+  "controls.jump": "Jump",
+
+  "settings.title": "Settings",
+  "settings.language": "Language",
+  "settings.english": "English",
+  "settings.arabic": "العربية",
+  "settings.close": "Close",
+  "settings.logout": "Log Out",
+
+  "world.fountain": "Wishing Fountain",
+  "world.academy": "The Grand Academy",
+  "world.boutique": "Royal Boutique",
+
+  "notify.reward.daily": "Daily reward: +{coins} coins!",
+  "notify.levelup": "Level up! You are now level {level}."
+}

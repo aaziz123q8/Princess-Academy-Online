@@ -1,47 +1,114 @@
 # Princess Academy Online 👑
 
-A magical, kid-friendly browser game where young princesses learn, play, and earn crowns. Built as a single self-contained website — **no build step, no dependencies** — so it runs anywhere just by opening `index.html`.
+A **real 3D browser game** — a bilingual (العربية / English) online social world inspired by
+Roblox, PK XD, and Avakin Life. It runs directly in the browser with **WebGL/WebGPU** (no plugin,
+no download) and is designed to deploy on **Hostinger** with a **Node.js + MySQL** backend.
 
-## ✨ Features
+Players log in, spawn as a customizable princess in a 3D fantasy city, walk around in third
+person, see other players in real time, and chat — in Arabic (RTL) or English, switchable live.
 
-The academy has four classrooms, all tied together by a **crown reward system** and progress that's saved to the browser (`localStorage`):
+> **Status — playable foundation.** The 3D world, third-person character + camera, mobile touch
+> controls, realtime multiplayer, bilingual UI, and the secure Node/MySQL backend (auth + save)
+> are implemented. Bigger features (houses, pets, shop, events, admin panel) are staged in
+> [`docs/ROADMAP.md`](docs/ROADMAP.md) and built step by step.
 
-| Classroom | What it does |
-|-----------|--------------|
-| 👗 **Dress-Up Studio** | Design a royal look — pick a crown, hair color, and dress color on a CSS-drawn doll. Save your look for crowns. |
-| 🧠 **Royal Quiz** | A 5-question trivia round drawn from a bigger question bank, with shuffled answers and a perfect-score bonus. |
-| 🃏 **Memory Match** | Classic 4×4 flip-and-match game. Fewer moves = more crowns. |
-| 🫖 **Etiquette Class** | Gentle "choose the kindest response" scenarios that teach good manners. |
+---
 
-## 🚀 Running it
+## Tech stack
 
-No install needed. Either:
+| Layer | Technology | Notes |
+|-------|-----------|-------|
+| 3D engine | **Babylon.js 7** (WebGL2, WebGPU when available) | Runs in every modern mobile & desktop browser |
+| Build | **Vite** | Outputs a static `dist/` you upload to Hostinger |
+| UI / i18n | Vanilla JS + CSS overlays, custom AR/EN engine with **RTL** | No hard-coded user strings |
+| Backend | **Node.js + Express** | Single app can also serve the game |
+| Realtime | **WebSocket (`ws`)** | Player movement, presence, chat |
+| Database | **MySQL 8 / MariaDB** (Hostinger-supported, `utf8mb4`) | Accounts, characters, economy, social, leaderboards |
+| Auth | **JWT + bcrypt** | Rate-limited endpoints |
 
-- **Just open it:** double-click `index.html`, or
-- **Serve it locally** (recommended, avoids any browser file restrictions):
+No Unity. No Docker. No PostgreSQL. No Redis.
 
-  ```bash
-  python3 -m http.server 8000
-  # then visit http://localhost:8000
-  ```
+---
 
-## 🗂️ Project structure
+## Repository layout
 
 ```
-index.html   — markup for all screens
-styles.css   — theme, layout, animations (pink & purple, sparkly)
-script.js    — game logic for all four activities + crown/save system
+Princess-Academy-Online/
+├── client/                  ← Babylon.js game (Vite)
+│   ├── index.html
+│   ├── vite.config.js
+│   └── src/
+│       ├── main.js          ← screen flow, wiring
+│       ├── game/            ← Babylon: engine, world, player, camera, input, network
+│       └── ui/              ← i18n (ar/en), styles, HUD, API client
+├── server/                  ← Node.js + MySQL backend
+│   ├── sql/schema.sql       ← MySQL schema (utf8mb4)
+│   └── src/                 ← express app, auth, routes, realtime websocket
+└── docs/                    ← architecture, roadmap, localization, Hostinger deploy
 ```
 
-## 🧩 Extending it
+---
 
-The activities are data-driven, so adding content is easy — edit the arrays near the top of each section in `script.js`:
+## Run it locally
 
-- `quizBank` — add `{ q, a: [...], correct }` objects for more trivia.
-- `mannersBank` — add `{ s, opts: [...], correct, good }` scenarios.
-- `dressOptions` — add crowns/hair/dress colors to the Dress-Up Studio.
-- `memoryIcons` — swap the emoji used in Memory Match.
+**Prerequisites:** Node.js 18+ and a local MySQL/MariaDB (or a remote Hostinger DB).
 
-## 🔒 Privacy
+### 1. Backend
 
-Everything runs locally in the browser. The only data stored is your crown count and saved look, kept on your own device via `localStorage`. Nothing is sent anywhere.
+```bash
+cd server
+cp .env.example .env          # then edit DB_* and JWT_SECRET
+npm install
+npm run init-db               # creates the tables
+npm run dev                   # http://localhost:3000
+```
+
+### 2. Client
+
+```bash
+cd client
+npm install
+npm run dev                   # http://localhost:5173  (proxies /api and /ws to :3000)
+```
+
+Open http://localhost:5173. Register or click **Play as Guest** (guest works even with no
+backend), then walk around with **WASD**/arrows (or the on-screen joystick on mobile) and drag to
+orbit the camera. Toggle **English / العربية** any time — the whole UI flips to RTL for Arabic.
+
+> **Guest/offline mode:** if the backend or websocket isn't running, the game still loads and is
+> fully explorable single-player. Multiplayer and cloud-save activate automatically when the
+> server is reachable.
+
+---
+
+## Deploy to Hostinger
+
+Two supported models (single Node app, or static client + Node API). Full step-by-step —
+including creating the MySQL database, setting env vars, and building the client — is in
+[`docs/DEPLOY-HOSTINGER.md`](docs/DEPLOY-HOSTINGER.md).
+
+Quick version (single Node app on a plan with Node.js support):
+
+```bash
+cd client && npm install && npm run build   # produces client/dist
+# upload the repo, set env vars in hPanel, run the MySQL schema, then start:
+cd server && npm install && npm start        # SERVE_CLIENT=true serves the game too
+```
+
+---
+
+## Localization (Arabic / English) — first-class
+
+Every user-facing string is a **key**, resolved at runtime from
+`client/src/ui/locales/{en,ar}.json` (client) and `server/src/i18n.js` (backend). Switching
+language is instant and sets the document direction to **RTL** for Arabic with mirrored layout.
+Adding a language = adding one JSON file. Details in [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md).
+
+---
+
+## Documentation
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the client, backend, and realtime fit together
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — what's done and the step-by-step feature plan
+- [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md) — the bilingual/RTL system
+- [`docs/DEPLOY-HOSTINGER.md`](docs/DEPLOY-HOSTINGER.md) — production deployment
