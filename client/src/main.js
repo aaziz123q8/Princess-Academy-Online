@@ -192,6 +192,8 @@ async function enterGame(profile) {
     onChat: (m) => hud.chatMessage(m),
     onSystem: (key, params) => hud.systemMessage(key, params),
     onGreet: (key, params) => hud.systemMessage(key, params),
+    onStory: (key, params) => hud.systemMessage(key, params),
+    onObjective: (key, params) => setObjective(key, params),
     onReward: (kind, amount, xp) => {
       if (kind === "coin") {
         hud.addCoins(amount);
@@ -272,6 +274,15 @@ function claimDailyReward() {
 }
 
 /* ------------------------------- helpers ------------------------------ */
+
+let currentObjective = { key: "quest.obj.find", params: { n: 0, total: 5 } };
+function setObjective(key, params) {
+  currentObjective = { key, params };
+  const el = document.getElementById("objectiveText");
+  if (el) el.textContent = t(key, params);
+}
+// Keep the objective banner localized when the language changes.
+onLanguageChange(() => setObjective(currentObjective.key, currentObjective.params));
 
 function progress(pct, statusKey) {
   els.loaderFill.style.width = `${Math.round(pct * 100)}%`;

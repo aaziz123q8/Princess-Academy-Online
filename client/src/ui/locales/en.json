@@ -31,6 +31,14 @@
   "quest.collect": "Collect the gems",
   "quest.done": "Quest complete! +100 coins 🎉",
 
+  "quest.obj.find": "🌟 Find the Star Shards — {n}/{total}",
+  "quest.obj.tower": "🗼 Enter the Mystery Tower!",
+  "quest.obj.done": "👑 Quest complete — the Crown is restored!",
+  "quest.story.intro": "Luna: The Crown of Light shattered into 5 Star Shards, now hidden across the kingdom. Follow the pillars of light and find them all! ✨",
+  "quest.story.shard": "✨ Star Shard found! {n}/5",
+  "quest.story.unlock": "🗼 The Mystery Tower's barrier fades… enter it to the south!",
+  "quest.story.finale": "👑 You restored the Crown of Light! The kingdom shines again! +200 🪙 +10 💎",
+
   "reward.coin": "+{n} 🪙",
   "reward.gem": "+{n} 💎",
 

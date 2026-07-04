@@ -14,6 +14,7 @@ import { Collectibles } from "./Collectibles.js";
 import { PetCompanion } from "./PetCompanion.js";
 import { House } from "./House.js";
 import { NPCs } from "./NPC.js";
+import { QuestManager } from "./QuestManager.js";
 import { setupVisuals } from "./Visuals.js";
 
 export class Game {
@@ -64,6 +65,14 @@ export class Game {
     this.npcs = new NPCs(this.scene, {
       getPlayerPos: getPos,
       onGreet: opts.onGreet || (() => {}),
+    });
+
+    // Main adventure: the Star Shard quest.
+    this.quest = new QuestManager(this.scene, {
+      player: this.player,
+      onReward: opts.onReward || (() => {}),
+      onObjective: opts.onObjective || (() => {}),
+      onStory: opts.onStory || (() => {}),
     });
 
     if (opts.multiplayer) {
@@ -127,6 +136,7 @@ export class Game {
   dispose() {
     window.removeEventListener("resize", this._onResize);
     this.network?.dispose();
+    this.quest?.dispose();
     this.npcs?.dispose();
     this.house?.dispose();
     this.collectibles?.dispose();
