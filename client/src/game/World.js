@@ -15,6 +15,7 @@ import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator.
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js";
 import { DynamicTexture } from "@babylonjs/core/Materials/Textures/dynamicTexture.js";
+import { addCastleBackdrop } from "./Backdrop.js";
 
 import "@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent.js";
 import "@babylonjs/core/Collisions/collisionCoordinator.js";
@@ -74,6 +75,9 @@ export function buildWorld(scene) {
 
   // ---- Puffy storybook clouds + a warm sun disc (flat billboard sprites) ----
   buildSkyDecor(scene);
+
+  // ---- Painted Academy castle landmark on the north skyline (if uploaded) ----
+  addCastleBackdrop(scene);
 
   // ---- Ground ----
   const ground = MeshBuilder.CreateGround("ground", { width: WORLD_SIZE, height: WORLD_SIZE, subdivisions: 2 }, scene);

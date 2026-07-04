@@ -27,7 +27,7 @@ import { toonMesh } from "./Toon.js";
 const FLAT_FILL = 0.26;
 
 // Meshes we never outline or flatten (backdrops, flat UI, huge planes).
-const SKIP = /^(sky|ground|plaza|bound_|.*label|.*Sprite|.*water|petSprite)/i;
+const SKIP = /^(sky|ground|plaza|bound_|cloud_|sunGlow|castleBackdrop|.*label|.*Sprite|.*water|petSprite)/i;
 
 /**
  * Turn a plain lit StandardMaterial into a flat cel material:
